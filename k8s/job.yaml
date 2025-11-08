@@ -1,11 +1,9 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  generateName: treasure-job-         # K8s will create treasure-job-xxxxx
+  name: treasure-job              # <- required by Harness; keep static
   labels:
     app: treasure
-  annotations:
-    harness.sequence: "<+pipeline.sequenceId>"  # just for traceability; not used as a name
 spec:
   backoffLimit: 0
   ttlSecondsAfterFinished: 300
@@ -24,8 +22,13 @@ spec:
           args:
             - |
               import os
-              print(r'''...ASCII ART...''')
+              print(r'''
+              *******************************************************************************
+              ... (ASCII art unchanged) ...
+              *******************************************************************************
+              ''')
               print("Welcome to Treasure Island.")
+              print("Your mission is to find the treasure.")
               crossroad = os.getenv("CROSSROAD", "left").lower()
               if crossroad == "right":
                   print("You fell into the hole! You are dead!")
