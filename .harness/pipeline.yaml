@@ -1,7 +1,7 @@
 pipeline:
   name: treasure-ci
   identifier: treasure_ci
-  projectIdentifier: PythonCIDemo_Treasure
+  projectIdentifier: PythonCIDemo_treasure
   orgIdentifier: default
 
   properties:
