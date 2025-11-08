@@ -74,3 +74,4 @@ spec:
               value: "<+pipeline.variables.LAKE>"
             - name: DOOR
               value: "<+pipeline.variables.DOOR>"
+              
