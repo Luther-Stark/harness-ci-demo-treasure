@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: treasure-job
+  name: treasure-job-<+pipeline.sequenceId>
   labels:
     app: treasure
 spec:
@@ -14,14 +14,22 @@ spec:
       restartPolicy: Never
       containers:
         - name: treasure
-          image: jcontin03/harness-ci-demo-treasure:<+pipeline.sequenceId>
-          # For demo, feed answers via args/env (non-interactive)
+          image: luther-stark/harness-ci-demo-treasure:<+pipeline.sequenceId>
+          env:
+            - name: CROSSROAD      # "left" or "right"
+              value: <+pipeline.variables.CROSSROAD>
+            - name: LAKE           # "wait" or "swim"
+              value: <+pipeline.variables.LAKE>
+            - name: DOOR           # "red" | "blue" | "yellow"
+              value: <+pipeline.variables.DOOR>
           command: ["/bin/sh","-lc"]
           args:
             - |
-              python - <<'PY'
-              import subprocess,sys
-              p = subprocess.run([sys.executable,"/app/app/treasure.py"],
-                                 input=b"left\nwait\nyellow\n")
-              sys.exit(p.returncode)
-              PY
+              set -e
+              # Feed answers (lowercase) to the game via stdin
+              printf "%s\n%s\n%s\n" \
+                "${CROSSROAD:-left}" \
+                "${LAKE:-wait}" \
+                "${DOOR:-yellow}" \
+              | tr '[:upper:]' '[:lower:]' \
+              | python /app/app/treasure.py
