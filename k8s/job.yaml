@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: treasure-job
+  name: treasure-job-<+pipeline.sequenceId>
   labels:
     app: treasure
 spec:
