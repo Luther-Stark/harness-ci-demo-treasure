@@ -10,6 +10,17 @@ pipeline:
         connectorRef: github_ci_demo_connector
         build: <+input>   # choose branch at runtime (e.g., main)
 
+  variables:
+    - name: CROSSROAD
+      type: String
+      value: left
+    - name: LAKE
+      type: String
+      value: wait
+    - name: DOOR
+      type: String
+      value: yellow
+
   stages:
     # ===================== CI STAGE =====================
     - stage:
@@ -78,7 +89,7 @@ pipeline:
         identifier: Deploy_to_K8s
         type: Deployment
         spec:
-          # >>> FIX: serviceConfig -> service (inline Service definition)
+          # Inline Service definition (manifests + artifact)
           service:
             name: treasure-service
             identifier: treasure_service
@@ -106,13 +117,11 @@ pipeline:
                       imagePath: luther-stark/harness-ci-demo-treasure
                       tag: <+pipeline.sequenceId>   # deploy the exact CI-built tag
 
-          infrastructure:
+          # New schema: reference Environment + Infra Definition(s)
+          environment:
             environmentRef: demo
-            infrastructureDefinition:
-              type: KubernetesDirect
-              spec:
-                connectorRef: k8s_demo_cluster
-                namespace: demo
+            infrastructureDefinitions:
+              - identifier: demo_infra   # must exist under the 'demo' Environment
 
           execution:
             steps:
