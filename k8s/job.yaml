@@ -75,3 +75,4 @@ spec:
             - name: DOOR
               value: "<+pipeline.variables.DOOR>"
               
+              
