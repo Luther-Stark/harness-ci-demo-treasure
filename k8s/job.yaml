@@ -1,11 +1,15 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: treasure-job-<+pipeline.sequenceId>
+  generateName: treasure-job-         # K8s will create treasure-job-xxxxx
   labels:
     app: treasure
+  annotations:
+    harness.sequence: "<+pipeline.sequenceId>"  # just for traceability; not used as a name
 spec:
   backoffLimit: 0
+  ttlSecondsAfterFinished: 300
+  activeDeadlineSeconds: 300
   template:
     metadata:
       labels:
@@ -14,48 +18,23 @@ spec:
       restartPolicy: Never
       containers:
         - name: treasure
-          image: "lutherstark/harness-ci-demo-treasure:latest"     
+          image: "lutherstark/harness-ci-demo-treasure:latest"
           imagePullPolicy: IfNotPresent
           command: ["python", "-c"]
           args:
             - |
               import os
-              print(r'''
-              *******************************************************************************
-                        |                   |                  |                     |
-               _________|________________.=""_;=.______________|_____________________|_______
-              |                   |  ,-"_,=""     `"=.|                  |
-              |___________________|__"=._o`"-._        `"=.______________|___________________
-                        |                `"=._o`"=._      _`"=._                     |
-               _________|_____________________:=._o "=._."_.-="'"=.__________________|_______
-              |                   |    __.--" , ; `"=._o." ,-"""-._ ".   |
-              |___________________|_._"  ,. .` ` `` ,  `"-._"-._   ". '__|___________________
-                        |           |o`"=._` , "` `; .". ,  "-._"-._; ;              |
-               _________|___________| ;`-.o`"=._; ." ` '`."\ ` . "-._ /_______________|_______
-              |                   | |o ;    `"-.o`"=._``  '` " ,__.--o;   |
-              |___________________|_| ;     (#) `-.o `"=.`_.--"_o.-; ;___|___________________
-              ____/______/______/___|o;._    "      `".o|o_.--"    ;o;____/______/______/____
-              /______/______/______/_"=._o--._        ; | ;        ; ;/______/______/______/_
-              ____/______/______/______/__"=._o--._   ;o|o;     _._;o;____/______/______/____
-              /______/______/______/______/____"=._o._; | ;_.--"o.--"_/______/______/______/_
-              ____/______/______/______/_____"=.o|o_.--""___/______/______/______/______/____
-              /______/______/______/______/______/______/______/______/______/______/_____ /
-              *******************************************************************************
-              ''')
+              print(r'''...ASCII ART...''')
               print("Welcome to Treasure Island.")
-              print("Your mission is to find the treasure.")
-
               crossroad = os.getenv("CROSSROAD", "left").lower()
               if crossroad == "right":
                   print("You fell into the hole! You are dead!")
                   raise SystemExit(0)
-
               print("Good choice. you are moving on.")
               lake = os.getenv("LAKE", "wait").lower()
               if lake != "wait":
                   print("Ops!! An aligator just ate you. You are dead!")
                   raise SystemExit(0)
-
               print("Good choice, you are not fish food!")
               door = os.getenv("DOOR", "yellow").lower()
               if door == "red":
@@ -66,7 +45,6 @@ spec:
                   print("You found the treasure!!! You are the winner!")
               else:
                   print("Should have picked the right door! Game Over!")
-
           env:
             - name: CROSSROAD
               value: "<+pipeline.variables.CROSSROAD>"
