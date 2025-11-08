@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   # Let Kubernetes generate a unique name like treasure-job-abc123
-  generateName: treasure-job-
+  generateName: treasure-job
   # optional: set namespace here, or omit it and use the namespace from your Harness infra
   # namespace: demo
   labels:
