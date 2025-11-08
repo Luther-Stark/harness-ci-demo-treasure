@@ -11,34 +11,48 @@ pipeline:
         build: <+input>   # choose branch at runtime (e.g., main)
 
   stages:
+    # ===================== CI STAGE =====================
     - stage:
         name: Build_Test_Push
         identifier: Build_Test_Push
         type: CI
         spec:
           cloneCodebase: true
-		      platform:
-		  	    os: Linux
-		        arch: Amd64
-		      runtime:
-		        type: Cloud
-		        spec: {}
-		      execution
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
+
+          execution:
             steps:
+              # 1) Create venv, install deps, run pytest
               - step:
                   type: Run
-                  name: Install and Test
+                  name: Install and Test (venv + pytest)
                   identifier: Install_Test
                   spec:
+                    image: python:3.11-slim
                     shell: Sh
+                    envVariables:
+                      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+                      PYTHONDONTWRITEBYTECODE: "1"
                     command: |
+                      set -e
+                      python --version
+                      pip --version
                       python -m venv venv
                       . venv/bin/activate
                       pip install -U pip
-                      pip install -r requirements.txt
+                      if [ -f requirements.txt ]; then
+                        pip install -r requirements.txt
+                      else
+                        echo "requirements.txt not found; installing pytest"; pip install pytest
+                      fi
                       pytest -q
 
-              # ---------- Reusable Step Template ----------
+              # 2) Reusable template: Build & Push to DockerHub
               - step:
                   name: Build and Push
                   identifier: Build_Push
@@ -49,10 +63,9 @@ pipeline:
                       type: BuildAndPushDockerRegistry
                       spec:
                         connectorRef: Docker-Token-CI
-                        repo: lutherstark/harness-ci-demo-treasure
+                        repo: luther-stark/harness-ci-demo-treasure
                         dockerfile: Dockerfile
                         context: .
-              # -------------------------------------------
 
           failureStrategies:
             - onFailure:
@@ -60,6 +73,7 @@ pipeline:
                 action:
                   type: MarkAsFailure
 
+    # ===================== CD STAGE =====================
     - stage:
         name: Deploy_to_K8s
         identifier: Deploy_to_K8s
@@ -87,8 +101,9 @@ pipeline:
                     type: DockerRegistry
                     spec:
                       connectorRef: Docker-Token-CI
-                      imagePath: lutherstark/harness-ci-demo-treasure
-                      tag: <+pipeline.sequenceId>   # deploy the exact CI image
+                      imagePath: luther-stark/harness-ci-demo-treasure
+                      tag: <+pipeline.sequenceId>   # deploy the exact CI-built tag
+
           infrastructure:
             environmentRef: demo
             infrastructureDefinition:
