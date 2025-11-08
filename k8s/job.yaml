@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: treasure-job
+  labels:
+    app: treasure
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app: treasure
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: treasure
+          image: jcontin03/harness-ci-demo-treasure:<+pipeline.sequenceId>
+          # For demo, feed answers via args/env (non-interactive)
+          command: ["/bin/sh","-lc"]
+          args:
+            - |
+              python - <<'PY'
+              import subprocess,sys
+              p = subprocess.run([sys.executable,"/app/app/treasure.py"],
+                                 input=b"left\nwait\nyellow\n")
+              sys.exit(p.returncode)
+              PY

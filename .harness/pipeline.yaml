@@ -1,0 +1,125 @@
+pipeline:
+  name: treasure-ci
+  identifier: treasure_ci
+  projectIdentifier: PythonCIDemo_Treasure
+  orgIdentifier: default
+
+  properties:
+    ci:
+      codebase:
+        connectorRef: github_ci_demo_connector
+        build: <+input>   # choose branch at runtime (e.g., main)
+
+  stages:
+    - stage:
+        name: Build_Test_Push
+        identifier: Build_Test_Push
+        type: CI
+        spec:
+          cloneCodebase: true
+		      platform:
+		  	    os: Linux
+		        arch: Amd64
+		      runtime:
+		        type: Cloud
+		        spec: {}
+		      execution
+            steps:
+              - step:
+                  type: Run
+                  name: Install and Test
+                  identifier: Install_Test
+                  spec:
+                    shell: Sh
+                    command: |
+                      python -m venv venv
+                      . venv/bin/activate
+                      pip install -U pip
+                      pip install -r requirements.txt
+                      pytest -q
+
+              # ---------- Reusable Step Template ----------
+              - step:
+                  name: Build and Push
+                  identifier: Build_Push
+                  template:
+                    templateRef: Build_Push_Docker_Generic
+                    versionLabel: v1
+                    templateInputs:
+                      type: BuildAndPushDockerRegistry
+                      spec:
+                        connectorRef: Docker-Token-CI
+                        repo: lutherstark/harness-ci-demo-treasure
+                        dockerfile: Dockerfile
+                        context: .
+              # -------------------------------------------
+
+          failureStrategies:
+            - onFailure:
+                errors: [AllErrors]
+                action:
+                  type: MarkAsFailure
+
+    - stage:
+        name: Deploy_to_K8s
+        identifier: Deploy_to_K8s
+        type: Deployment
+        spec:
+          serviceConfig:
+            serviceDefinition:
+              type: Kubernetes
+              spec:
+                manifests:
+                  - manifest:
+                      identifier: k8s_job
+                      type: K8sManifest
+                      spec:
+                        store:
+                          type: Git
+                          spec:
+                            connectorRef: github_ci_demo_connector
+                            repoName: harness-ci-demo-treasure
+                            branch: main
+                            paths:
+                              - k8s/job.yaml
+                artifacts:
+                  primary:
+                    type: DockerRegistry
+                    spec:
+                      connectorRef: Docker-Token-CI
+                      imagePath: lutherstark/harness-ci-demo-treasure
+                      tag: <+pipeline.sequenceId>   # deploy the exact CI image
+          infrastructure:
+            environmentRef: demo
+            infrastructureDefinition:
+              type: KubernetesDirect
+              spec:
+                connectorRef: k8s_demo_cluster
+                namespace: demo
+
+          execution:
+            steps:
+              - step:
+                  type: K8sApply
+                  name: Apply Job
+                  identifier: Apply_Job
+                  spec:
+                    filePaths:
+                      - k8s/job.yaml
+                  failureStrategies:
+                    - onFailure:
+                        errors: [AllErrors]
+                        action:
+                          type: Retry
+                          spec:
+                            retryCount: 2
+                            retryIntervals: [30s, 60s]
+                            onRetryFailure:
+                              action:
+                                type: MarkAsFailure
+
+        failureStrategies:
+          - onFailure:
+              errors: [AllErrors]
+              action:
+                type: StageRollback

@@ -1,0 +1,47 @@
+print(r'''
+*******************************************************************************
+          |                   |                  |                     |
+ _________|________________.=""_;=.______________|_____________________|_______
+|                   |  ,-"_,=""     `"=.|                  |
+|___________________|__"=._o`"-._        `"=.______________|___________________
+          |                `"=._o`"=._      _`"=._                     |
+ _________|_____________________:=._o "=._."_.-="'"=.__________________|_______
+|                   |    __.--" , ; `"=._o." ,-"""-._ ".   |
+|___________________|_._"  ,. .` ` `` ,  `"-._"-._   ". '__|___________________
+          |           |o`"=._` , "` `; .". ,  "-._"-._; ;              |
+ _________|___________| ;`-.o`"=._; ." ` '`."\ ` . "-._ /_______________|_______
+|                   | |o ;    `"-.o`"=._``  '` " ,__.--o;   |
+|___________________|_| ;     (#) `-.o `"=.`_.--"_o.-; ;___|___________________
+____/______/______/___|o;._    "      `".o|o_.--"    ;o;____/______/______/____
+/______/______/______/_"=._o--._        ; | ;        ; ;/______/______/______/_
+____/______/______/______/__"=._o--._   ;o|o;     _._;o;____/______/______/____
+/______/______/______/______/____"=._o._; | ;_.--"o.--"_/______/______/______/_
+____/______/______/______/______/_____"=.o|o_.--""___/______/______/______/____
+/______/______/______/______/______/______/______/______/______/______/_____ /
+*******************************************************************************
+''')
+print("Welcome to Treasure Island.")
+print("Your mission is to find the treasure.")
+
+# First intersection
+crossroad = input("You came across a fork on the road! Which way to go? Left or Right. ").lower()
+if crossroad == "right":
+    print("You fell into the hole! You are dead!")
+elif crossroad == "left":
+    print("Good choice. you are moving on.")
+
+    lake = input("you came into a Lake. Do you swim or wait for the boat? Swim or Wait. ").lower()
+    if lake != "wait":
+        print(" Ops!! An aligator just eat you. You are dead!")
+    else:
+        print("Good choice, you are not fish food!")
+        door = input ("Finally! Arrived to the final obstacle. Which door would you choose, Red, Yellow or Blue? ").lower()
+
+        if door == "red":
+            print(" You just got burned by fire. You are dead!")
+        elif door == "blue":
+            print("Sorry, there was a bear here and you just got eaten!!.")
+        elif door == "yellow":
+            print("You found the treasure!!! You are the winner!")
+        else:
+            print("Should have picked up the right door! Game Over!")
