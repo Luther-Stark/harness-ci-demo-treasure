@@ -14,7 +14,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: treasure
-          image: "<+artifact.image>"       # Harness replaces this with the built image
+          image: "lutherstark/harness-ci-demo-treasure:latest"     
           imagePullPolicy: IfNotPresent
           command: ["python", "-c"]
           args:
