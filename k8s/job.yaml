@@ -1,10 +1,8 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  # Let Kubernetes generate a unique name like treasure-job-abc123
-  generateName: treasure-job
-  # optional: set namespace here, or omit it and use the namespace from your Harness infra
-  # namespace: demo
+  name: treasure-job          # <-- top-level metadata.name (required)
+  # namespace: demo           # optional; omit if your Harness infra sets the namespace
   labels:
     app: treasure
 spec:
@@ -17,32 +15,14 @@ spec:
       restartPolicy: Never
       containers:
         - name: treasure
-          # Harness will inject the full image:tag from your Primary Artifact
-          image: "<+artifact.image>"
+          image: "<+artifact.image>"          # Harness resolves from your Primary Artifact
           imagePullPolicy: IfNotPresent
           command: ["python", "-c"]
           args:
             - |
               print(r'''
               *******************************************************************************
-                        |                   |                  |                     |
-               _________|________________.=""_;=.______________|_____________________|_______
-              |                   |  ,-"_,=""     `"=.|                  |
-              |___________________|__"=._o`"-._        `"=.______________|___________________
-                        |                `"=._o`"=._      _`"=._                     |
-               _________|_____________________:=._o "=._."_.-="'"=.__________________|_______
-              |                   |    __.--" , ; `"=._o." ,-"""-._ ".   |
-              |___________________|_._"  ,. .` ` `` ,  `"-._"-._   ". '__|___________________
-                        |           |o`"=._` , "` `; .". ,  "-._"-._; ;              |
-               _________|___________| ;`-.o`"=._; ." ` '`."\ ` . "-._ /_______________|_______
-              |                   | |o ;    `"-.o`"=._``  '` " ,__.--o;   |
-              |___________________|_| ;     (#) `-.o `"=.`_.--"_o.-; ;___|___________________
-              ____/______/______/___|o;._    "      `".o|o_.--"    ;o;____/______/______/____
-              /______/______/______/_"=._o--._        ; | ;        ; ;/______/______/______/_
-              ____/______/______/______/__"=._o--._   ;o|o;     _._;o;____/______/______/____
-              /______/______/______/______/____"=._o._; | ;_.--"o.--"_/______/______/______/_
-              ____/______/______/______/_____"=.o|o_.--""___/______/______/______/______/____
-              /______/______/______/______/______/______/______/______/______/______/_____ /
+              ... (ASCII art) ...
               *******************************************************************************
               ''')
               print("Welcome to Treasure Island.")
@@ -66,7 +46,6 @@ spec:
                           print("You found the treasure!!! You are the winner!")
                       else:
                           print("Should have picked up the right door! Game Over!")
-
           env:
             - name: CROSSROAD
               value: "<+pipeline.variables.CROSSROAD>"
@@ -74,5 +53,4 @@ spec:
               value: "<+pipeline.variables.LAKE>"
             - name: DOOR
               value: "<+pipeline.variables.DOOR>"
-              
               
