@@ -1,7 +1,7 @@
 pipeline:
   name: treasure-ci
   identifier: treasure_ci
-  projectIdentifier: PythonCIDemo_treasure
+  projectIdentifier: PythonCIDemo_treasure   # <-- ensure this matches your actual Project ID
   orgIdentifier: default
 
   properties:
@@ -23,7 +23,6 @@ pipeline:
             arch: Amd64
           runtime:
             type: Cloud
-            spec: {}
 
           execution:
             steps:
@@ -79,7 +78,10 @@ pipeline:
         identifier: Deploy_to_K8s
         type: Deployment
         spec:
-          serviceConfig:
+          # >>> FIX: serviceConfig -> service (inline Service definition)
+          service:
+            name: treasure-service
+            identifier: treasure_service
             serviceDefinition:
               type: Kubernetes
               spec:
